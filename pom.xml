@@ -1,0 +1,846 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.pactera.jeesite</groupId>
+		<artifactId>aggregator</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../aggregator</relativePath>
+	</parent>
+
+	<groupId>com.pactera.jeesite</groupId>
+	<artifactId>pactera-jeesite</artifactId>
+	<version>0.0.1</version>
+	<packaging>war</packaging>
+
+	<name>jeesite-web-dist</name>
+	<url>http://maven.apache.org</url>
+	<description>这个工程是最外围的web工程，起到聚合的作用，即把所有的web项目，打成最终的war包。同时，在这个工程里，放置里放置和替换公共的配置文件，比如*.xml、*.properties等</description>
+
+	<properties>
+		<pactera.jeesite.version>1.2.10</pactera.jeesite.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<argLine>-Dfile.encoding=UTF-8</argLine>
+	</properties>
+	
+	<!-- 设定主仓库，按设定顺序进行查找。 -->
+	<repositories>
+	
+		<!-- Nexus私服 -->
+		<repository>
+			<id>pactera-haya-nexus-repos</id>
+			<name>Pactera Team Nexus Repository</name>
+			<url>http://192.168.5.5:8083/nexus/content/</url>
+		</repository>
+		<!-- Nexus OutOfOffice 外网访问
+		<repository>
+			<id>pactera-haya-nexus-repos-ooo</id>
+			<name>Pactera Team Nexus Repository Out Of Office</name>
+			<url>http://219.143.215.116:8083/nexus/conten/</url>
+		</repository> -->
+				
+	</repositories>
+	
+	<!-- 设定插件仓库 -->
+	<pluginRepositories> 
+	
+		<!-- Nexus私服  -->
+		<pluginRepository>
+			<id>nexus-repos</id>
+			<name>Team Nexus Repository</name>
+			<url>http://192.168.5.5:8083/nexus/content/groups/public</url>
+		</pluginRepository>
+		<!-- Nexus OutOfOffice 外网访问
+		<pluginRepository>
+			<id>nexus-repos-ooo</id>
+			<name>Team Nexus Repository</name>
+			<url>http://219.143.215.116:8083/nexus/content/groups/public</url>
+		</pluginRepository> -->
+				
+	</pluginRepositories> 
+	
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- 依赖的各模块war包 -->
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>jeesite-web</artifactId>
+			<version>${pactera.jeesite.version}</version>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>jeesite-gen</artifactId>
+			<version>${pactera.jeesite.version}</version>
+			<type>war</type>
+		</dependency>
+		
+		<!-- 手动裁剪 start
+		  end-->
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>jeesite-cms</artifactId>
+			<version>${pactera.jeesite.version}</version>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>jeesite-oa</artifactId>
+			<version>${pactera.jeesite.version}</version>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>jeesite-soa</artifactId>
+			<version>${pactera.jeesite.version}</version>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>pactera-crm</artifactId>
+			<version>${pactera.jeesite.version}</version>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>pactera-sms</artifactId>
+			<version>${pactera.jeesite.version}</version>
+			<type>war</type>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- war 打包插件, 设定war包名称不带版本号 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<webappDirectory>${project.build.directory}/${project.artifactId}</webappDirectory><!-- 
+						<webXml>${project.basedir}/target/jspweb.xml</webXml> -->
+					<warName>${project.artifactId}</warName>
+				</configuration>
+			</plugin>
+
+			<!-- 利用cargo启动容器 http://localhost:port/cargocpc/index.html -->
+			<plugin>
+				<groupId>org.codehaus.cargo</groupId>
+				<artifactId>cargo-maven2-plugin</artifactId>
+				<configuration>
+					<container>
+						<containerId>tomcat6x</containerId>
+						<home>D:\dev\apache-tomcat-6.0.20-jeecg</home>
+						<!-- <type>remote</type> -->
+						<type>installed</type>
+					</container>
+					<configuration>
+						<!-- standalone type config
+						<type>standalone</type>
+						<home>${project.build.directory}/tomcat6.0.20</home> -->
+						
+						<!-- existing -->
+						<type>existing</type>
+						<home>D:\dev\apache-tomcat-6.0.20-jeecg</home>
+
+						<!-- runtime
+						<type>runtime</type> -->
+						
+						<properties>
+							<cargo.jvmargs>
+								-Xdebug
+								-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8080
+								-Xnoagent
+								-Djava.compiler=NONE
+								-Xms1024m -Xmx1024m -XX:PermSize=128M -XX:MaxNewSize=512m
+								-XX:MaxPermSize=256m
+							</cargo.jvmargs>
+							
+                            <catalina.servlet.uriencoding>UTF-8</catalina.servlet.uriencoding>
+                            <cargo.tomcat.context.reloadable>true</cargo.tomcat.context.reloadable>
+                            
+                            <!-- remote tomcat -->
+							<cargo.remote.username>admin</cargo.remote.username>
+							<cargo.remote.password>admin</cargo.remote.password>
+							<cargo.tomcat.manager.url>http://localhost:8080/manager/html</cargo.tomcat.manager.url>
+							
+							<!-- https://codehaus-cargo.github.io/cargo/Configuration+properties.html
+									Port on which the Servlet/JSP container listens to -->
+							<cargo.servlet.port>8080</cargo.servlet.port>
+						</properties>
+
+					</configuration>
+
+					<deployables>
+						<deployable>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<type>war</type>
+						</deployable>
+					</deployables>
+				</configuration>
+				
+				<executions>
+					<execution>
+						<!--
+						<id>cargo-run</id> -->
+
+						<!-- 
+							https://codehaus-cargo.github.io/cargo/Debugging.html
+							Listening for transport dt_socket at address: 8000
+						 -->
+						<id>run</id>
+						<configuration>
+							<configuration>
+								<properties>
+									<cargo.jvmargs>
+										-Xdebug
+										-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000
+										-Xnoagent
+										-Djava.compiler=NONE
+									</cargo.jvmargs>
+									<cargo.servlet.port>8080</cargo.servlet.port>
+									<catalina.servlet.uriencoding>UTF-8</catalina.servlet.uriencoding>
+								</properties>
+							</configuration>
+						</configuration>
+      
+						<phase>pre-integration-test</phase>
+						<!--  Cargo plugin更适合UAT等测试环境自动化部署发布时使用，或IT运维人员远程部署调试使用；
+							开发团队为了提高项目build启动performance效能建议选型此非cargo模式启动。
+							开启cargo run启动模式：						
+						<goals>
+							<goal>run</goal>
+						</goals> -->
+					</execution>
+					  
+                    <!-- 执行的动作
+                    <execution>
+                        <id>verify-deployer</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>deployer-deploy</goal>
+                        </goals>
+                    </execution>
+                        
+                    <execution>
+                        <id>clean-deployer</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>deployer-undeploy</goal>
+                        </goals>
+                    </execution>
+                    
+					<execution>
+						<id>verify-deploy</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>deployer-redeploy</goal>
+						</goals>
+					</execution>
+				
+					<execution>
+						<id>redeploy</id>
+						<phase>install</phase>
+						<goals>
+							<goal>stop</goal>
+							<goal>start</goal>
+						</goals>
+					</execution> -->
+                    
+				</executions>
+			</plugin>
+			
+			<!-- source插件 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		
+		<!-- 为主资源目录开启过滤
+			tell the maven-resources-plugin where the resources are located and that filtering must be switched on
+		 	Instructing the resources plugin to filter certain directories
+		 -->
+		<resources>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+	</build>
+
+	<!-- 配置部署的企业仓库
+		[out of office]219.143.215.116:8083
+		[in-house]192.168.5.5:8083
+	 -->
+	<distributionManagement>
+		<repository>
+			<id>releases</id>
+			<name>Nexus Rlease Repository</name>
+			<url>http://192.168.5.5:8083/nexus/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<name>Nexus Snapshots Repository</name>
+			<url>http://192.168.5.5:8083/nexus/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<!-- 针对不同环境启用不同的配置值，构建差异环境
+		Using Maven profiles and resource filtering
+	 -->
+	<profiles>
+		<!-- pactera-jeesite产品迭代开发环境数据库[Intranet内网](HayaBuilding)
+			aggreagtor/ $mvn clean install -Pdev_pdt
+		-->
+		<profile>
+			<id>dev_pdt</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc.url>
+				<jdbc.username>jeesite</jdbc.username>
+				<jdbc.password>123456</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc2.url>
+				<jdbc2.username>ccip</jdbc2.username>
+				<jdbc2.password>ccip</jdbc2.password>
+				
+				<productName>Pactera-JeeSite \u5FEB\u901F\u5F00\u53D1\u5E73\u53F0 IN-HOUSE</productName><!-- 快速开发平台 -->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u6587\u601D\u6D77\u8F89</organization><!--文思海辉-->
+				<orgPortal>http://pactera.com</orgPortal>
+				<poweredBy>Pactera</poweredBy>
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		<!-- pactera-jeesite产品迭代开发环境数据库[Internet外网](Out of office) 
+			aggreagtor/ $mvn clean install -Pdev_pdt_ooo
+		-->
+		<profile>
+			<id>dev_pdt_ooo</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@219.143.215.116:8092:orcl</jdbc.url>
+				<jdbc.username>jeesite</jdbc.username>
+				<jdbc.password>123456</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@219.143.215.116:8092:orcl</jdbc2.url>
+				<jdbc2.username>jeesite</jdbc2.username>
+				<jdbc2.password>123456</jdbc2.password>
+				
+				<productName>Pactera-JeeSite \u5FEB\u901F\u5F00\u53D1\u5E73\u53F0 OOO</productName><!-- 快速开发平台 -->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u6587\u601D\u6D77\u8F89</organization><!--文思海辉-->
+				<orgPortal>http://pactera.com</orgPortal>
+				<poweredBy>Pactera</poweredBy>
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		<!-- 本地开发环境数据库
+			aggreagtor/ $mvn clean install -Pdev_lol
+		-->
+		<profile>
+			<id>dev_lol</id>
+			<properties>
+				<sceneMode>lol</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@localhost:1521:orcl</jdbc.url>
+				<jdbc.username>jeesite</jdbc.username>
+				<jdbc.password>123456</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@localhost:1521:orcl</jdbc2.url>
+				<jdbc2.username>jeesite</jdbc2.username>
+				<jdbc2.password>123456</jdbc2.password>
+				
+				<productName>Pactera-JeeSite LOL</productName>
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u6587\u601D\u6D77\u8F89</organization><!--文思海辉-->
+				<orgPortal>http://pactera.com</orgPortal>
+				<poweredBy>Pactera</poweredBy>
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		<!-- mysql开发环境数据库
+			aggreagtor/ $mvn clean install -Pdev_ms
+		-->
+		<profile>
+			<id>dev_ms</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>mysql</jdbc.type>
+				<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+				<jdbc.url>jdbc:mysql://localhost:3306/jeesite?useUnicode=true&amp;characterEncoding=utf-8</jdbc.url>
+				<jdbc.username>root</jdbc.username>
+				<jdbc.password>123456</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>mysql</jdbc2.type>
+				<jdbc2.driver>com.mysql.jdbc.Driver</jdbc2.driver>
+				<jdbc2.url>jdbc:mysql://localhost:3306/jeesite?useUnicode=true&amp;characterEncoding=utf-8</jdbc2.url>
+				<jdbc2.username>root</jdbc2.username>
+				<jdbc2.password>123456</jdbc2.password>
+				
+				<productName>Pactera-JeeSite MySql</productName>
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u6587\u601D\u6D77\u8F89</organization><!--文思海辉-->
+				<orgPortal>http://pactera.com</orgPortal>
+				<poweredBy>Pactera</poweredBy>
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		<!-- MS sqlserver开发环境数据库
+			aggreagtor/ $mvn clean install -Pdev_mss
+		-->
+		<profile>
+			<id>dev_mss</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>mssql</jdbc.type>
+				<jdbc.driver>net.sourceforge.jtds.jdbc.Driver</jdbc.driver>
+				<jdbc.url>jdbc:jtds:sqlserver://localhost:1433/jeesite</jdbc.url>
+				<jdbc.username>sa</jdbc.username>
+				<jdbc.password>sa</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>mssql</jdbc2.type>
+				<jdbc2.driver>net.sourceforge.jtds.jdbc.Driver</jdbc2.driver>
+				<jdbc2.url>jdbc:jtds:sqlserver://localhost:1433/jeesite</jdbc2.url>
+				<jdbc2.username>sa</jdbc2.username>
+				<jdbc2.password>sa</jdbc2.password>
+				
+				<productName>Pactera-JeeSite MSS</productName>
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u6587\u601D\u6D77\u8F89</organization><!--文思海辉-->
+				<orgPortal>http://pactera.com</orgPortal>
+				<poweredBy>Pactera</poweredBy>
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		
+		<!-- 山航BI项目开发环境数据库[Intranet内网](HayaBuilding)
+			aggreagtor/ $mvn clean install -Pdev_bi
+		-->
+		<profile>
+			<id>dev_bi</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc.url>
+				<jdbc.username>sdbi</jdbc.username>
+				<jdbc.password>sdbi</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc2.url>
+				<!-- 	山航常旅客系统数据库：scffp/scffp 
+						山航渠道系统数据库：  scsale/scsale -->
+				<jdbc2.username>scffp</jdbc2.username>
+				<jdbc2.password>scffp</jdbc2.password>
+				
+				<productName>\u5E38\u65C5\u5BA2\u53CA\u5206\u9500\u6E20\u9053\u7BA1\u7406\u7CFB\u7EDF</productName><!--常旅客及分销渠道管理系统-->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u5C71\u4E1C\u822A\u7A7A</organization><!--山东航空-->
+				<orgPortal>http://www.shandongair.com.cn/</orgPortal>
+				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		<!-- 山航BI项目开发环境数据库[Internet外网](Out of office)
+			aggreagtor/ $mvn clean install -Pdev_bi_ooo
+		-->
+		<profile>
+			<id>dev_bi_ooo</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@219.143.215.116:8092:orcl</jdbc.url>
+				<jdbc.username>sdbi</jdbc.username>
+				<jdbc.password>sdbi</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@219.143.215.116:8092:orcl</jdbc2.url>
+				<!-- 	山航常旅客系统数据库：scffp/scffp 
+						山航渠道系统数据库：  scsale/scsale -->
+				<jdbc2.username>scffp</jdbc2.username>
+				<jdbc2.password>scffp</jdbc2.password>
+				
+				<productName>\u5E38\u65C5\u5BA2\u53CA\u5206\u9500\u6E20\u9053\u7BA1\u7406\u7CFB\u7EDF</productName><!--常旅客及分销渠道管理系统-->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u5C71\u4E1C\u822A\u7A7A</organization><!--山东航空-->
+				<orgPortal>http://www.shandongair.com.cn/</orgPortal>
+				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		
+		<!-- 成都航空电子商务平台 -->
+		<!-- 成都电商CMS项目开发环境数据库[Intranet内网](HayaBuilding)
+			aggreagtor/ $mvn clean install -Pdev_cms
+		-->	
+		<profile>
+			<id>dev_cms</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc.url>
+				<jdbc.username>cda_cms</jdbc.username>
+				<jdbc.password>cda_cms</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc2.url>
+				<jdbc2.username>cda_cms</jdbc2.username>
+				<jdbc2.password>cda_cms</jdbc2.password>
+				
+				<productName>\u7535\u5B50\u5546\u52A1\u5E73\u53F0</productName><!--电子商务平台-->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u6210\u90FD\u822A\u7A7A</organization><!--成都航空-->
+				<orgPortal>http://chengduair.cc/</orgPortal>
+				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		<!-- 成都电商CMS项目开发环境数据库[Internet外网](Out of office)
+			aggreagtor/ $mvn clean install -Pdev_cms_ooo
+		-->	
+		<profile>
+			<id>dev_cms_ooo</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@219.143.215.116:8092:orcl</jdbc.url>
+				<jdbc.username>cda_cms</jdbc.username>
+				<jdbc.password>cda_cms</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@219.143.215.116:8092:orcl</jdbc2.url>
+				<jdbc2.username>cda_cms</jdbc2.username>
+				<jdbc2.password>cda_cms</jdbc2.password>
+				
+				<productName>\u7535\u5B50\u5546\u52A1\u5E73\u53F0</productName><!--电子商务平台-->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u6210\u90FD\u822A\u7A7A</organization><!--成都航空-->
+				<orgPortal>http://chengduair.cc/</orgPortal>
+				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		<!-- 成都电商常旅客FFP(FrequencyFlyerProgram)项目开发环境数据库[Intranet内网](HayaBuilding) 
+			aggreagtor/ $mvn clean install -Pdev_ffp
+		-->
+		<profile>
+			<id>dev_ffp</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc.url>
+				<jdbc.username>cda_ffp</jdbc.username>
+				<jdbc.password>cda_ffp</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc2.url>
+				<jdbc2.username>cda_ffp</jdbc2.username>
+				<jdbc2.password>cda_ffp</jdbc2.password>
+				
+				<productName>\u5E38\u65C5\u5BA2\u7CFB\u7EDF FFP</productName><!--常旅客系统 FFP-->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u6210\u90FD\u822A\u7A7A</organization><!--成都航空-->
+				<orgPortal>http://chengduair.cc/</orgPortal>
+				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		<!-- 成都电商常旅客FFP(FrequencyFlyerProgram)项目开发环境数据库[Internet外网](Out of office)
+			aggreagtor/ $mvn clean install -Pdev_ffp_ooo
+		-->
+		<profile>
+			<id>dev_ffp_ooo</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@219.143.215.116:8092:orcl</jdbc.url>
+				<jdbc.username>cda_ffp</jdbc.username>
+				<jdbc.password>cda_ffp</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@219.143.215.116:8092:orcl</jdbc2.url>
+				<jdbc2.username>cda_ffp</jdbc2.username>
+				<jdbc2.password>cda_ffp</jdbc2.password>
+				
+				<productName>\u5E38\u65C5\u5BA2\u7CFB\u7EDF FFP</productName><!--常旅客系统 FFP-->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u6210\u90FD\u822A\u7A7A</organization><!--成都航空-->
+				<orgPortal>http://chengduair.cc/</orgPortal>
+				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		<!-- 成都电商统一支撑平台USP(UnifiedSupportingPlatform)项目开发环境数据库[Intranet内网](HayaBuilding)
+			aggreagtor/ $mvn clean install -Pdev_usp
+		-->
+		<profile>
+			<id>dev_usp</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc.url>
+				<jdbc.username>cda_usp</jdbc.username>
+				<jdbc.password>cda_usp</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc2.url>
+				<jdbc2.username>cda_usp</jdbc2.username>
+				<jdbc2.password>cda_usp</jdbc2.password>
+				
+				<productName>\u7535\u5546\u7EDF\u4E00\u652F\u6491\u5E73\u53F0 USP</productName><!--电商统一支撑平台 USP-->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u6210\u90FD\u822A\u7A7A</organization><!--成都航空-->
+				<orgPortal>http://chengduair.cc/</orgPortal>
+				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		<!-- 成都电商统一支撑平台USP(UnifiedSupportingPlatform)项目开发环境数据库[Internet外网](Out of office)
+			aggreagtor/ $mvn clean install -Pdev_usp_ooo
+		-->
+		<profile>
+			<id>dev_usp_ooo</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@219.143.215.116:8092:orcl</jdbc.url>
+				<jdbc.username>cda_usp</jdbc.username>
+				<jdbc.password>cda_usp</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@219.143.215.116:8092:orcl</jdbc2.url>
+				<jdbc2.username>cda_usp</jdbc2.username>
+				<jdbc2.password>cda_usp</jdbc2.password>
+				
+				<productName>\u7535\u5546\u7EDF\u4E00\u652F\u6491\u5E73\u53F0 USP</productName><!--电商统一支撑平台 USP-->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u6210\u90FD\u822A\u7A7A</organization><!--成都航空-->
+				<orgPortal>http://chengduair.cc/</orgPortal>
+				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		
+		<!-- CRSC通号院智能平台 -->
+		<!-- 会议室智能管理软件CCIP(council chamber intelligence platform)项目开发环境数据库[Intranet内网](HayaBuilding) 
+			aggreagtor/ $mvn clean install -Pdev_ccip
+		-->
+		<profile>
+			<id>dev_ccip</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc.url>
+				<jdbc.username>ccip</jdbc.username>
+				<jdbc.password>ccip</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc2.url>
+				<jdbc2.username>ccip_test</jdbc2.username>
+				<jdbc2.password>ccip_test</jdbc2.password>
+				
+				<productName>CRSC \u4F1A\u8BAE\u5BA4\u667A\u80FD\u7BA1\u7406\u8F6F\u4EF6 CCIP</productName><!--CRSC 会议室智能管理软件 CCIP-->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u901A\u53F7\u9662CRSC</organization><!--通号院CRSC-->
+				<orgPortal>http://qlth.crsc.cn/</orgPortal>
+				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		<!-- 会议室智能管理软件CCIP(council chamber intelligence platform)项目开发环境数据库[Internet外网](Out of office)
+			aggreagtor/ $mvn clean install -Pdev_ccip_ooo
+		-->
+		<profile>
+			<id>dev_ccip_ooo</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@219.143.215.116:8092:orcl</jdbc.url>
+				<jdbc.username>ccip</jdbc.username>
+				<jdbc.password>ccip</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@219.143.215.116:8092:orcl</jdbc2.url>
+				<jdbc2.username>ccip_test</jdbc2.username>
+				<jdbc2.password>ccip_test</jdbc2.password>
+				
+				<productName>CRSC \u4F1A\u8BAE\u5BA4\u667A\u80FD\u7BA1\u7406\u8F6F\u4EF6 CCIP</productName><!--CRSC 会议室智能管理软件 CCIP-->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u901A\u53F7\u9662CRSC</organization><!--通号院CRSC-->
+				<orgPortal>http://qlth.crsc.cn/</orgPortal>
+				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+		<!-- 会议室智能管理软件CCIP(council chamber intelligence platform)
+			项目驻场开发环境测试数据库:Test/QA	For functional, performance testing, Quality Assurance etc.
+			aggreagtor/ $mvn clean install -Pccip_onsite_dev
+		-->
+		<profile>
+			<id>ccip_onsite_dev</id>
+			<properties>
+				<sceneMode>qa</sceneMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@10.2.49.254:1521:ib</jdbc.url>
+				<jdbc.username>mtuser</jdbc.username>
+				<jdbc.password>mtuser</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@10.2.49.254:1521:ib</jdbc2.url>
+				<jdbc2.username>mtuser</jdbc2.username>
+				<jdbc2.password>mtuser</jdbc2.password>
+				
+				<productName>CRSC \u4F1A\u8BAE\u5BA4\u667A\u80FD\u7BA1\u7406\u8F6F\u4EF6 CCIP</productName><!--CRSC 会议室智能管理软件 CCIP-->
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u901A\u53F7\u9662CRSC</organization><!--通号院CRSC-->
+				<orgPortal>http://qlth.crsc.cn/</orgPortal>
+				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+			</properties>
+		</profile>
+	</profiles>
+		
+	<developers>
+		<developer>
+			<id>jeffen</id>
+			<name>Jeffen Cheung</name>
+			<email>jeffencheung@gmail.com</email>
+			<roles>
+				<role>Lead Developer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
+	</developers>
+</project>
