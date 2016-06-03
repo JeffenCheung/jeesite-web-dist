@@ -5,43 +5,17 @@
 	<parent>
 		<groupId>com.pactera.jeesite</groupId>
 		<artifactId>aggregator</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.1</version>
 		<relativePath>../aggregator</relativePath>
 	</parent>
 
-	<groupId>com.pactera.jeesite</groupId>
 	<artifactId>pactera-jeesite</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 	<packaging>war</packaging>
 
 	<name>jeesite-web-dist</name>
 	<url>http://maven.apache.org</url>
 	<description>这个工程是最外围的web工程，起到聚合的作用，即把所有的web项目，打成最终的war包。同时，在这个工程里，放置里放置和替换公共的配置文件，比如*.xml、*.properties等</description>
-
-	<properties>
-		<pactera.jeesite.version>1.2.10</pactera.jeesite.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<argLine>-Dfile.encoding=UTF-8</argLine>
-	</properties>
-	
-	<!-- 设定主仓库，按设定顺序进行查找。 -->
-	<repositories>
-	
-		<!-- Nexus私服 -->
-		<repository>
-			<id>pactera-haya-nexus-repos</id>
-			<name>Pactera Team Nexus Repository</name>
-			<url>http://192.168.5.5:8083/nexus/content/</url>
-		</repository>
-		<!-- Nexus OutOfOffice 外网访问
-		<repository>
-			<id>pactera-haya-nexus-repos-ooo</id>
-			<name>Pactera Team Nexus Repository Out Of Office</name>
-			<url>http://219.143.215.116:8083/nexus/conten/</url>
-		</repository> -->
-				
-	</repositories>
 	
 	<!-- 设定插件仓库 -->
 	<pluginRepositories> 
@@ -62,57 +36,44 @@
 	</pluginRepositories> 
 	
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
-			<scope>test</scope>
-		</dependency>
 
 		<!-- 依赖的各模块war包 -->
 		<dependency>
-			<groupId>${project.groupId}</groupId>
+			<groupId>${pactera.jeesite.groupId}</groupId>
 			<artifactId>jeesite-web</artifactId>
-			<version>${pactera.jeesite.version}</version>
 			<type>war</type>
 		</dependency>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
+			<groupId>${pactera.jeesite.groupId}</groupId>
 			<artifactId>jeesite-gen</artifactId>
-			<version>${pactera.jeesite.version}</version>
 			<type>war</type>
 		</dependency>
 		
 		<!-- 手动裁剪 start
 		  end-->
 		<dependency>
-			<groupId>${project.groupId}</groupId>
+			<groupId>${pactera.jeesite.groupId}</groupId>
 			<artifactId>jeesite-cms</artifactId>
-			<version>${pactera.jeesite.version}</version>
 			<type>war</type>
 		</dependency>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
+			<groupId>${pactera.jeesite.groupId}</groupId>
 			<artifactId>jeesite-oa</artifactId>
-			<version>${pactera.jeesite.version}</version>
 			<type>war</type>
 		</dependency>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
+			<groupId>${pactera.jeesite.groupId}</groupId>
 			<artifactId>jeesite-soa</artifactId>
-			<version>${pactera.jeesite.version}</version>
 			<type>war</type>
 		</dependency>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
+			<groupId>${pactera.jeesite.groupId}</groupId>
 			<artifactId>pactera-crm</artifactId>
-			<version>${pactera.jeesite.version}</version>
 			<type>war</type>
 		</dependency>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
+			<groupId>${pactera.jeesite.groupId}</groupId>
 			<artifactId>pactera-sms</artifactId>
-			<version>${pactera.jeesite.version}</version>
 			<type>war</type>
 		</dependency>
 
@@ -129,6 +90,10 @@
 					<webappDirectory>${project.build.directory}/${project.artifactId}</webappDirectory><!-- 
 						<webXml>${project.basedir}/target/jspweb.xml</webXml> -->
 					<warName>${project.artifactId}</warName>
+					
+					<packagingIncludes>
+						sitemap/**
+					</packagingIncludes>
 				</configuration>
 			</plugin>
 
@@ -158,7 +123,7 @@
 						<properties>
 							<cargo.jvmargs>
 								-Xdebug
-								-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8080
+								-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=${webserver.port}
 								-Xnoagent
 								-Djava.compiler=NONE
 								-Xms1024m -Xmx1024m -XX:PermSize=128M -XX:MaxNewSize=512m
@@ -171,18 +136,18 @@
                             <!-- remote tomcat -->
 							<cargo.remote.username>admin</cargo.remote.username>
 							<cargo.remote.password>admin</cargo.remote.password>
-							<cargo.tomcat.manager.url>http://localhost:8080/manager/html</cargo.tomcat.manager.url>
+							<cargo.tomcat.manager.url>http://localhost:${webserver.port}/manager/html</cargo.tomcat.manager.url>
 							
 							<!-- https://codehaus-cargo.github.io/cargo/Configuration+properties.html
 									Port on which the Servlet/JSP container listens to -->
-							<cargo.servlet.port>8080</cargo.servlet.port>
+							<cargo.servlet.port>${webserver.port}</cargo.servlet.port>
 						</properties>
 
 					</configuration>
 
 					<deployables>
 						<deployable>
-							<groupId>${project.groupId}</groupId>
+							<groupId>${pactera.jeesite.groupId}</groupId>
 							<artifactId>${project.artifactId}</artifactId>
 							<type>war</type>
 						</deployable>
@@ -208,7 +173,7 @@
 										-Xnoagent
 										-Djava.compiler=NONE
 									</cargo.jvmargs>
-									<cargo.servlet.port>8080</cargo.servlet.port>
+									<cargo.servlet.port>${webserver.port}</cargo.servlet.port>
 									<catalina.servlet.uriencoding>UTF-8</catalina.servlet.uriencoding>
 								</properties>
 							</configuration>
@@ -217,7 +182,7 @@
 						<phase>pre-integration-test</phase>
 						<!--  Cargo plugin更适合UAT等测试环境自动化部署发布时使用，或IT运维人员远程部署调试使用；
 							开发团队为了提高项目build启动performance效能建议选型此非cargo模式启动。
-							开启cargo run启动模式：						
+							开启cargo run自启动模式：
 						<goals>
 							<goal>run</goal>
 						</goals> -->
@@ -260,6 +225,41 @@
 				</executions>
 			</plugin>
 			
+			<!-- jetty插件 -->
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>${jetty.version}</version>
+				<configuration>
+					<connectors>
+						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+							<port>${webserver.port}</port>
+						</connector>
+					</connectors>
+					<war>${project.basedir}/target/${project.artifactId}</war>
+					<webAppConfig>
+						<contextPath>/${project.artifactId}</contextPath>
+					</webAppConfig>
+					<systemProperties>  
+						<systemProperty>
+							<name>org.mortbay.util.URI.charset</name>
+							<value>${project.build.sourceEncoding}</value>
+						</systemProperty>
+					</systemProperties>
+				</configuration>
+				<executions>
+					<execution>
+						<id>run</id>
+						<phase>test-compile</phase>
+						<!-- 开启jetty run自启动模式：
+						<goals>
+							<goal>run</goal>
+						</goals>
+						 -->
+					</execution>
+				</executions>
+			</plugin>
+			
 			<!-- source插件 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -287,27 +287,46 @@
 		</resources>
 	</build>
 
-	<!-- 配置部署的企业仓库
-		[out of office]219.143.215.116:8083
-		[in-house]192.168.5.5:8083
-	 -->
-	<distributionManagement>
-		<repository>
-			<id>releases</id>
-			<name>Nexus Rlease Repository</name>
-			<url>http://192.168.5.5:8083/nexus/content/repositories/releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<name>Nexus Snapshots Repository</name>
-			<url>http://192.168.5.5:8083/nexus/content/repositories/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
-
 	<!-- 针对不同环境启用不同的配置值，构建差异环境
 		Using Maven profiles and resource filtering
 	 -->
 	<profiles>
+	
+		<!-- pactera-jeesite产品演示[Intranet内网](HayaBuilding)
+			aggreagtor/ $mvn clean install -Pdev_pdt_show
+		-->
+		<profile>
+			<id>dev_pdt_show</id>
+			<properties>
+				<sceneMode>dev</sceneMode>
+				<demoMode>true</demoMode>
+				
+				<!-- data source default -->
+				<jdbc.type>oracle</jdbc.type>
+				<jdbc.driver>oracle.jdbc.driver.OracleDriver</jdbc.driver>
+				<jdbc.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc.url>
+				<jdbc.username>jeesite</jdbc.username>
+				<jdbc.password>123456</jdbc.password>
+				
+				<!-- data source 2 -->
+				<jdbc2.type>oracle</jdbc2.type>
+				<jdbc2.driver>oracle.jdbc.driver.OracleDriver</jdbc2.driver>
+				<jdbc2.url>jdbc:oracle:thin:@192.168.5.5:1521:orcl</jdbc2.url>
+				<jdbc2.username>ccip</jdbc2.username>
+				<jdbc2.password>ccip</jdbc2.password>
+				
+				<productName>Pactera-JeeSite Demo Show</productName>
+				<copyrightYearSince>2015</copyrightYearSince>
+				<copyrightYear>2016</copyrightYear>
+				<organization>\u6587\u601D\u6D77\u8F89</organization><!--文思海辉-->
+				<orgPortal>http://pactera.com</orgPortal>
+				<poweredBy>Pactera</poweredBy>
+				<poweredByPortal>http://pactera.com</poweredByPortal>
+				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
+			</properties>
+		</profile>
+		
 		<!-- pactera-jeesite产品迭代开发环境数据库[Intranet内网](HayaBuilding)
 			aggreagtor/ $mvn clean install -Pdev_pdt
 		-->
@@ -315,6 +334,7 @@
 			<id>dev_pdt</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>oracle</jdbc.type>
@@ -338,6 +358,7 @@
 				<poweredBy>Pactera</poweredBy>
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		<!-- pactera-jeesite产品迭代开发环境数据库[Internet外网](Out of office) 
@@ -347,6 +368,7 @@
 			<id>dev_pdt_ooo</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>oracle</jdbc.type>
@@ -370,6 +392,7 @@
 				<poweredBy>Pactera</poweredBy>
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		<!-- 本地开发环境数据库
@@ -402,6 +425,7 @@
 				<poweredBy>Pactera</poweredBy>
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		<!-- mysql开发环境数据库
@@ -411,6 +435,7 @@
 			<id>dev_ms</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>mysql</jdbc.type>
@@ -434,6 +459,7 @@
 				<poweredBy>Pactera</poweredBy>
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		<!-- MS sqlserver开发环境数据库
@@ -443,6 +469,7 @@
 			<id>dev_mss</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>mssql</jdbc.type>
@@ -466,6 +493,7 @@
 				<poweredBy>Pactera</poweredBy>
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		
@@ -476,6 +504,7 @@
 			<id>dev_bi</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>oracle</jdbc.type>
@@ -501,6 +530,7 @@
 				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		<!-- 山航BI项目开发环境数据库[Internet外网](Out of office)
@@ -510,6 +540,7 @@
 			<id>dev_bi_ooo</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>oracle</jdbc.type>
@@ -535,6 +566,7 @@
 				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		
@@ -546,6 +578,7 @@
 			<id>dev_cms</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>oracle</jdbc.type>
@@ -569,6 +602,7 @@
 				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		<!-- 成都电商CMS项目开发环境数据库[Internet外网](Out of office)
@@ -578,6 +612,7 @@
 			<id>dev_cms_ooo</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>oracle</jdbc.type>
@@ -601,6 +636,7 @@
 				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		<!-- 成都电商常旅客FFP(FrequencyFlyerProgram)项目开发环境数据库[Intranet内网](HayaBuilding) 
@@ -610,6 +646,7 @@
 			<id>dev_ffp</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>oracle</jdbc.type>
@@ -633,6 +670,7 @@
 				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		<!-- 成都电商常旅客FFP(FrequencyFlyerProgram)项目开发环境数据库[Internet外网](Out of office)
@@ -642,6 +680,7 @@
 			<id>dev_ffp_ooo</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>oracle</jdbc.type>
@@ -665,6 +704,7 @@
 				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		<!-- 成都电商统一支撑平台USP(UnifiedSupportingPlatform)项目开发环境数据库[Intranet内网](HayaBuilding)
@@ -674,6 +714,7 @@
 			<id>dev_usp</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>oracle</jdbc.type>
@@ -697,6 +738,7 @@
 				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		<!-- 成都电商统一支撑平台USP(UnifiedSupportingPlatform)项目开发环境数据库[Internet外网](Out of office)
@@ -706,6 +748,7 @@
 			<id>dev_usp_ooo</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>oracle</jdbc.type>
@@ -729,6 +772,7 @@
 				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		
@@ -740,6 +784,7 @@
 			<id>dev_ccip</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>oracle</jdbc.type>
@@ -763,6 +808,7 @@
 				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		<!-- 会议室智能管理软件CCIP(council chamber intelligence platform)项目开发环境数据库[Internet外网](Out of office)
@@ -772,6 +818,7 @@
 			<id>dev_ccip_ooo</id>
 			<properties>
 				<sceneMode>dev</sceneMode>
+				<demoMode>false</demoMode>
 				
 				<!-- data source default -->
 				<jdbc.type>oracle</jdbc.type>
@@ -795,6 +842,7 @@
 				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 		<!-- 会议室智能管理软件CCIP(council chamber intelligence platform)
@@ -828,19 +876,27 @@
 				<poweredBy>\u6587\u601D\u6D77\u8F89</poweredBy><!--文思海辉-->
 				<poweredByPortal>http://pactera.com</poweredByPortal>
 				<version>V${project.version}</version>
+				<frameworkBuildVersion>Ver. ${pactera.jeesite.version}</frameworkBuildVersion>
 			</properties>
 		</profile>
 	</profiles>
-		
+	
+	<!-- [项目研发团队]开发者信息 -->
 	<developers>
 		<developer>
-			<id>jeffen</id>
-			<name>Jeffen Cheung</name>
-			<email>jeffencheung@gmail.com</email>
+			<id>engineerNo1</id>
+			<name>Nick Name</name>
+			<email>nickname@pactera.com</email>
+			<url>http://jeffencheung.github.com/</url>
+			<organization>Pactera</organization>
+			<organizationUrl>http://pactera.com</organizationUrl>
 			<roles>
 				<role>Lead Developer</role>
 			</roles>
 			<timezone>+8</timezone>
+			<properties>
+				<gtalk>jeffencheung@gmail.com</gtalk>
+			</properties>
 		</developer>
 	</developers>
 </project>
